@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:werewolves_of_thiercelieux/screens/create_profile_screen.dart';
 
 class HomePage extends StatefulWidget {
@@ -31,6 +32,12 @@ class _HomePageState extends State<HomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
   }
 
   @override

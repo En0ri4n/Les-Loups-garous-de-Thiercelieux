@@ -119,9 +119,16 @@ class GameCards {
   ];
 }
 
+class GameCardConfiguration {
+  final GameCard gameCard;
+  int count;
+
+  GameCardConfiguration({required this.gameCard, required this.count});
+}
+
 class GameConfiguration {
   final int playerCount;
-  final List<GameCard> cards;
+  final List<GameCardConfiguration> cards;
   final List<String> players;
 
   GameConfiguration({required this.playerCount, required this.cards, required this.players});
