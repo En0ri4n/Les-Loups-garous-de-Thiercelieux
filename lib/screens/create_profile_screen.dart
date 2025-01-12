@@ -1,24 +1,54 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:werewolves_of_thiercelieux/objects/database.dart';
 import 'package:werewolves_of_thiercelieux/objects/game_configuration.dart';
+import 'package:werewolves_of_thiercelieux/objects/ui_utils.dart';
 
 class CreateProfileScreen extends StatefulWidget {
-  const CreateProfileScreen({super.key});
+  const CreateProfileScreen({super.key}) : _profileId = -1;
+
+  const CreateProfileScreen.from(int profileId, {super.key}) : _profileId = profileId;
+
+  final int _profileId;
 
   @override
   State<StatefulWidget> createState() => _CreateProfileScreenState();
 }
 
 class _CreateProfileScreenState extends State<CreateProfileScreen> {
-  List<String> players = <String>[];
-  List<GameCardConfiguration> gameCards = <GameCardConfiguration>[];
-  late TextEditingController playerNameController = TextEditingController();
-  late TextEditingController gameCardNameController = TextEditingController();
+  List<String> _players = <String>[];
+  List<GameCardInstance> _gameCards = <GameCardInstance>[];
+
+  late TextEditingController _profileNameController;
+  late TextEditingController _playerNameController;
+  late TextEditingController gameCardNameController;
 
   @override
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+
+    log("Loading profile with id: ${widget._profileId}");
+
+    _profileNameController = TextEditingController();
+    _playerNameController = TextEditingController();
+    gameCardNameController = TextEditingController();
+
+    if(widget._profileId == -1) {
+      return;
+    }
+
+    GameDatabase().loadProfile(widget._profileId).then((profile) {
+      if (profile == null) {
+        return;
+      }
+
+      setState(() {
+        _profileNameController.text = profile.name;
+        _players = profile.players;
+        _gameCards = profile.cards;
+      });
+    });
   }
 
   @override
@@ -27,7 +57,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
 
     List<GameCard> possibleGameCards = <GameCard>[];
     possibleGameCards.addAll(GameCards.allCards);
-    for (GameCard element in gameCards.map((e) => e.gameCard)) {
+    for (GameCard element in _gameCards.map((e) => e.gameCard)) {
       possibleGameCards.remove(element);
     }
 
@@ -46,10 +76,11 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       shrinkWrap: true,
       children: <Widget>[
         const Center(
-          child: Text('Create Profile', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          child: Text('Nom du profile', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ),
-        const TextField(
-          decoration: InputDecoration(
+        TextField(
+          controller: _profileNameController,
+          decoration: const InputDecoration(
             border: OutlineInputBorder(),
             labelText: 'Profile Name',
           ),
@@ -58,24 +89,29 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         const Center(
           child: Text('Players', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ),
-        ListView.builder(
+        ListView.separated(
+          padding: const EdgeInsets.all(10),
+          separatorBuilder: (BuildContext context, int index) => const Divider(color: Colors.transparent, height: 10.0),
           shrinkWrap: true,
-          itemCount: players.length,
+          itemCount: _players.length,
           itemBuilder: (BuildContext context, int index) {
             return Container(
-              color: index.isOdd ? Colors.white : Colors.black12,
+              decoration: BoxDecoration(
+                color: index.isOdd ? Color(0xFF98C8E4) : Color(0xFF71B3B3),
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Padding(
                 padding: EdgeInsets.all(5.0),
                 child: Row(
                   children: <Widget>[
-                    Text(players[index]),
+                    Padding(padding: EdgeInsets.all(10.0), child: Text(_players[index])),
                     Spacer(),
                     ElevatedButton(
                         style: ElevatedButton.styleFrom(
                             elevation: 0, backgroundColor: Colors.transparent, shape: LinearBorder()),
                         onPressed: () {
                           setState(() {
-                            players.removeAt(index);
+                            _players.removeAt(index);
                           });
                         },
                         child: const Text('Remove'))
@@ -86,7 +122,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           },
         ),
         TextField(
-          controller: playerNameController,
+          controller: _playerNameController,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             labelText: 'Name',
@@ -95,9 +131,9 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         ElevatedButton(
           onPressed: () {
             setState(() {
-              if (playerNameController.text.isNotEmpty) {
-                players.add(playerNameController.text);
-                playerNameController.clear();
+              if (_playerNameController.text.isNotEmpty) {
+                _players.add(_playerNameController.text);
+                _playerNameController.clear();
               }
             });
           },
@@ -109,7 +145,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         ),
         ListView.builder(
             shrinkWrap: true,
-            itemCount: gameCards.length,
+            itemCount: _gameCards.length,
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 color: index.isOdd ? Colors.white : Colors.black12,
@@ -122,9 +158,9 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                       Expanded(
                         child: Row(
                           children: <Widget>[
-                            Image.asset(gameCards[index].gameCard.image, width: 50, height: 50),
+                            Image.asset(_gameCards[index].gameCard.image, width: 50, height: 50),
                             Spacer(),
-                            Text(gameCards[index].gameCard.name),
+                            Text(_gameCards[index].gameCard.name),
                             SizedBox(width: 10), // Add some spacing between input and button
                           ],
                         ),
@@ -136,13 +172,13 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                             Expanded(
                               child: TextField(
                                 keyboardType: TextInputType.number,
-                                controller: TextEditingController(text: gameCards[index].count.toString()),
+                                controller: TextEditingController(text: _gameCards[index].count.toString()),
                                 onSubmitted: (value) {
                                   setState(() {
                                     try {
-                                      gameCards[index].count = int.parse(value);
+                                      _gameCards[index].count = int.parse(value);
                                     } catch (e) {
-                                      gameCards[index].count = 1;
+                                      _gameCards[index].count = 1;
                                     }
                                   });
                                 },
@@ -154,7 +190,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                                   elevation: 0, backgroundColor: Colors.transparent, shape: LinearBorder()),
                               onPressed: () {
                                 setState(() {
-                                  gameCards.removeAt(index);
+                                  _gameCards.removeAt(index);
                                 });
                               },
                               child: const Text('Remove'),
@@ -172,18 +208,73 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           controller: gameCardNameController,
           onSelected: (value) => setState(() {
             if (value != null) {
-              gameCards.add(GameCardConfiguration(gameCard: value, count: value.requiredCount));
+              _gameCards.add(GameCardInstance(gameCard: value, count: value.requiredCount));
               gameCardNameController.clear();
             }
           }),
         ),
         ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFFC32323),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
           onPressed: () {
-            Navigator.of(context).pop();
+              UIUtils.createConfirmationDialog(context, "Voulez-vous vraiment supprimer le profile?", () {
+                if(widget._profileId != -1) {
+                  GameDatabase().removeProfile(widget._profileId);
+                }
+                Navigator.of(context).pop();
+              });
           },
-          child: const Text('Save'),
+          child: const Text('Supprimer le profile'),
         ),
       ],
-    ));
+    ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          log("Saving profile with id: ${widget._profileId}");
+          if(_profileNameController.text.isEmpty) {
+            UIUtils.createErrorDialog(context, "Le nom du profile ne peut pas être vide");
+            return;
+          }
+
+          if(_players.isEmpty) {
+            UIUtils.createErrorDialog(context, "Il doit y avoir au moins un joueur");
+            return;
+          }
+
+          if(_gameCards.isEmpty) {
+            UIUtils.createErrorDialog(context, "Il doit y avoir au moins une carte");
+            return;
+          }
+
+          if(_players.length != _gameCards.fold(0, (previousValue, element) => previousValue + element.count)) {
+            UIUtils.createErrorDialog(context, "Le nombre de joueurs doit correspondre au nombre de cartes");
+            return;
+          }
+
+          if (widget._profileId != -1) {
+            GameDatabase().updateProfile(GameProfileConfiguration(
+              id: widget._profileId,
+              name: _profileNameController.text,
+              players: _players,
+              cards: _gameCards,
+            )).then((v) { if(context.mounted) Navigator.of(context).pop(); });
+          }
+          else {
+            GameDatabase().saveProfile(GameProfileConfiguration.builder(
+              name: _profileNameController.text,
+              players: _players,
+              cards: _gameCards,
+            )).then((v) { if(context.mounted) Navigator.of(context).pop(); });
+          }
+        },
+        child: const Icon(Icons.save),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+    );
   }
 }

@@ -1,121 +1,121 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:werewolves_of_thiercelieux/objects/database.dart';
+import 'package:werewolves_of_thiercelieux/objects/game_configuration.dart';
 import 'package:werewolves_of_thiercelieux/screens/create_profile_screen.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int _counter = 0;
+  int _selectedPageIndex = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  // Profile list
+  late final List<GameProfileConfiguration> profiles = <GameProfileConfiguration>[];
 
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ));
+
+    updateProfiles();
+  }
+
+  void updateProfiles() {
+    GameDatabase().loadProfiles().then((profiles) {
+      setState(() {
+        this.profiles.clear();
+        this.profiles.addAll(profiles);
+        log("Loaded ${profiles.length} profiles");
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      drawer: Drawer(
-          child: ListView(
-            // Important: Remove any padding from the ListView.
-            padding: EdgeInsets.zero,
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                ),
-                child: Text('Drawer Header'),
-              ),
-              ListTile(
-                title: const Text('Item 1'),
-                onTap: () {
-                  // Update the state of the app.
-                  // ...
-                },
-              ),
-              ListTile(
-                title: const Text('Item 2'),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const CreateProfileScreen()));
-                },
-              ),
-            ],
+      bottomNavigationBar: NavigationBar(
+          onDestinationSelected: (int index) {
+            setState(() {
+              _selectedPageIndex = index;
+            });
+          },
+          selectedIndex: _selectedPageIndex,
+          indicatorColor: Colors.blue,
+          destinations: [
+            NavigationDestination(icon: Icon(Icons.home), selectedIcon: Icon(Icons.home_outlined), label: 'Accueil'),
+            NavigationDestination(icon: Icon(Icons.person), label: 'Profiles'),
+            NavigationDestination(icon: Icon(Icons.settings), label: 'Paramètres'),
+          ]),
+      body: <Widget>[
+        // Home page
+        Scaffold(
+          appBar: AppBar(
+            title: Text('Home'),
           ),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-          ],
+          body: const Text('Home', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+
+        // Profiles page
+        Scaffold(
+          appBar: AppBar(
+            title: Text('Profiles'),
+          ),
+          body: ListView.separated(
+            scrollDirection: Axis.vertical,
+            separatorBuilder: (BuildContext context, int index) => const Divider(color: Colors.transparent, height: 10.0,),
+              padding: const EdgeInsets.all(10),
+              itemCount: profiles.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTileTheme(
+                  tileColor: Color(0xFF71B3B3),
+                  minVerticalPadding: 10,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: ListTile(
+                    title: Text(profiles[index].name),
+                    trailing: Text('${profiles[index].players.length} joueurs'),
+
+                    onTap: () {
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (BuildContext context) => CreateProfileScreen.from(profiles[index].id)))
+                          .then((value) { updateProfiles(); });
+                    },
+                  ),
+                );
+              },
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (BuildContext context) => CreateProfileScreen()))
+                  .then((value) { updateProfiles(); });
+            },
+            child: const Icon(Icons.add),
+          ),
+        ),
+
+        // Settings page
+        Scaffold(
+          appBar: AppBar(
+            title: Text('Settings'),
+          ),
+          body: const Text('Settings', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        ),
+      ][_selectedPageIndex],
     );
   }
 }
