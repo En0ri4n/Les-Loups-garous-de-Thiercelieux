@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -32,7 +33,7 @@ class GameDatabase {
     log("Initializing database");
 
     // Initialize the database
-    final dir = await getApplicationDocumentsDirectory();
+    final Directory dir = await getApplicationDocumentsDirectory();
     // make sure it exists
     await dir.create(recursive: true);
     // build the database path

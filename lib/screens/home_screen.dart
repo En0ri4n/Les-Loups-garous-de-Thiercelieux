@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:werewolves_of_thiercelieux/objects/database.dart';
 import 'package:werewolves_of_thiercelieux/objects/game_configuration.dart';
 import 'package:werewolves_of_thiercelieux/screens/create_profile_screen.dart';
+import 'package:werewolves_of_thiercelieux/screens/setup_game_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -65,7 +66,17 @@ class _HomePageState extends State<HomePage> {
           appBar: AppBar(
             title: Text('Home'),
           ),
-          body: const Text('Home', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          body: Column(
+            children: <Widget>[
+              const Text('Home', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => SetupGameScreen()));
+                },
+                child: const Text('Start'),
+              ),
+            ],
+          )
         ),
 
         // Profiles page

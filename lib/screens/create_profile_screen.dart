@@ -28,7 +28,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   void initState() {
     super.initState();
 
-    log("Loading profile with id: ${widget._profileId}");
+    log(widget._profileId == -1 ? "Loading new profile" : "Loading profile with id: ${widget._profileId}");
 
     _profileNameController = TextEditingController();
     _playerNameController = TextEditingController();
@@ -224,9 +224,11 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           onPressed: () {
               UIUtils.createConfirmationDialog(context, "Voulez-vous vraiment supprimer le profile?", () {
                 if(widget._profileId != -1) {
-                  GameDatabase().removeProfile(widget._profileId);
+                  GameDatabase().removeProfile(widget._profileId).then((v) { if(context.mounted) Navigator.of(context).pop(); });
                 }
-                Navigator.of(context).pop();
+                else {
+                  Navigator.of(context).pop();
+                }
               });
           },
           child: const Text('Supprimer le profile'),
