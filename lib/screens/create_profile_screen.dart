@@ -24,6 +24,8 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   late TextEditingController _playerNameController;
   late TextEditingController gameCardNameController;
 
+  late List<DropdownMenuEntry<GameCard>> gameCardsDropdownMenuEntries = <DropdownMenuEntry<GameCard>>[];
+
   @override
   void initState() {
     super.initState();
@@ -34,6 +36,31 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     _playerNameController = TextEditingController();
     gameCardNameController = TextEditingController();
 
+    loadProfile();
+    createGameCardsDropdownMenuEntries();
+  }
+
+  void createGameCardsDropdownMenuEntries() {
+    gameCardsDropdownMenuEntries.clear();
+
+    List<GameCard> possibleGameCards = <GameCard>[];
+    possibleGameCards.addAll(GameCards.allCards);
+    for (GameCard element in _gameCards.map((e) => e.gameCard)) {
+      possibleGameCards.remove(element);
+    }
+
+    for (GameCard gameCard in possibleGameCards) {
+      gameCardsDropdownMenuEntries.add(DropdownMenuEntry(
+        value: gameCard,
+        label: gameCard.name,
+        labelWidget: Text(gameCard.name),
+        trailingIcon: Image.asset(gameCard.version.icon, width: 50, height: 50),
+        leadingIcon: Image.asset(gameCard.image, width: 50, height: 50),
+      ));
+    }
+  }
+
+  void loadProfile() {
     if(widget._profileId == -1) {
       return;
     }
@@ -53,23 +80,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<DropdownMenuEntry<GameCard>> gameCardsDropdownMenuEntries = <DropdownMenuEntry<GameCard>>[];
-
-    List<GameCard> possibleGameCards = <GameCard>[];
-    possibleGameCards.addAll(GameCards.allCards);
-    for (GameCard element in _gameCards.map((e) => e.gameCard)) {
-      possibleGameCards.remove(element);
-    }
-
-    for (GameCard gameCard in possibleGameCards) {
-      gameCardsDropdownMenuEntries.add(DropdownMenuEntry(
-        value: gameCard,
-        label: gameCard.name,
-        labelWidget: Text(gameCard.name),
-        trailingIcon: Image.asset(gameCard.version.icon, width: 50, height: 50),
-        leadingIcon: Image.asset(gameCard.image, width: 50, height: 50),
-      ));
-    }
     return Scaffold(
         body: ListView(
       padding: const EdgeInsets.all(10),

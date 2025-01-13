@@ -5,6 +5,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:werewolves_of_thiercelieux/objects/game_configuration.dart';
+import 'package:werewolves_of_thiercelieux/objects/game_state.dart';
 
 
 class GameDatabase {
@@ -13,6 +14,7 @@ class GameDatabase {
   final String _settingsStoreName = 'settings';
   final String _profilesStoreName = 'profiles';
   final String _gamesStoreName = 'games';
+  final String _currentGameStoreName = 'current_game';
 
   bool _initialized = false;
   late Database _database;
@@ -103,9 +105,16 @@ class GameDatabase {
     return records.map((record) => GameProfileConfiguration.deserialize(record.value)).toList();
   }
 
-  Future<void> saveGame(GameProfileConfiguration game) async {
+  Future<void> saveGame(GameState game) async {
     await _ensureInitialized();
     final store = intMapStoreFactory.store(_gamesStoreName);
     await store.add(_database, game.serialize());
+  }
+
+  Future<void> removeGame(int gameId) async {
+    await _ensureInitialized();
+    final store = intMapStoreFactory.store(_gamesStoreName);
+    final finder = Finder(filter: Filter.equals('true', 'true'));
+    await store.delete(_database, finder: finder);
   }
 }

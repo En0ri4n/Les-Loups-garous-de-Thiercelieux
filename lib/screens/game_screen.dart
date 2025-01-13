@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:werewolves_of_thiercelieux/objects/game_state.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({Key? key}) : super(key: key);
+  const GameScreen({super.key}) : gameState = null;
+
+  const GameScreen.fromGameState(this.gameState, {super.key});
+
+  final GameState? gameState;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
