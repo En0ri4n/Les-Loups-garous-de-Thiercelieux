@@ -78,6 +78,45 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     });
   }
 
+  void saveProfile() {
+    log("Saving profile with id: ${widget._profileId}");
+    if(_profileNameController.text.isEmpty) {
+      UIUtils.createErrorDialog(context, "Le nom du profile ne peut pas être vide");
+      return;
+    }
+
+    if(_players.isEmpty) {
+      UIUtils.createErrorDialog(context, "Il doit y avoir au moins un joueur");
+      return;
+    }
+
+    if(_gameCards.isEmpty) {
+      UIUtils.createErrorDialog(context, "Il doit y avoir au moins une carte");
+      return;
+    }
+
+    if(_players.length != _gameCards.fold(0, (previousValue, element) => previousValue + element.count)) {
+      UIUtils.createErrorDialog(context, "Le nombre de joueurs doit correspondre au nombre de cartes");
+      return;
+    }
+
+    if (widget._profileId != -1) {
+      GameDatabase().updateProfile(GameProfileConfiguration(
+        id: widget._profileId,
+        name: _profileNameController.text,
+        players: _players,
+        cards: _gameCards,
+      )).then((v) { if(context.mounted) Navigator.of(context).pop(); });
+    }
+    else {
+      GameDatabase().saveProfile(GameProfileConfiguration.builder(
+        name: _profileNameController.text,
+        players: _players,
+        cards: _gameCards,
+      )).then((v) { if(context.mounted) Navigator.of(context).pop(); });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -217,10 +256,10 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
           dropdownMenuEntries: gameCardsDropdownMenuEntries,
           controller: gameCardNameController,
           onSelected: (value) => setState(() {
-            if (value != null) {
+            if (value != null && !_gameCards.any((element) => element.gameCard == value)) {
               _gameCards.add(GameCardInstance(gameCard: value, count: value.requiredCount));
-              gameCardNameController.clear();
             }
+            gameCardNameController.clear();
           }),
         ),
         ElevatedButton(
@@ -246,44 +285,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
       ],
     ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          log("Saving profile with id: ${widget._profileId}");
-          if(_profileNameController.text.isEmpty) {
-            UIUtils.createErrorDialog(context, "Le nom du profile ne peut pas être vide");
-            return;
-          }
-
-          if(_players.isEmpty) {
-            UIUtils.createErrorDialog(context, "Il doit y avoir au moins un joueur");
-            return;
-          }
-
-          if(_gameCards.isEmpty) {
-            UIUtils.createErrorDialog(context, "Il doit y avoir au moins une carte");
-            return;
-          }
-
-          if(_players.length != _gameCards.fold(0, (previousValue, element) => previousValue + element.count)) {
-            UIUtils.createErrorDialog(context, "Le nombre de joueurs doit correspondre au nombre de cartes");
-            return;
-          }
-
-          if (widget._profileId != -1) {
-            GameDatabase().updateProfile(GameProfileConfiguration(
-              id: widget._profileId,
-              name: _profileNameController.text,
-              players: _players,
-              cards: _gameCards,
-            )).then((v) { if(context.mounted) Navigator.of(context).pop(); });
-          }
-          else {
-            GameDatabase().saveProfile(GameProfileConfiguration.builder(
-              name: _profileNameController.text,
-              players: _players,
-              cards: _gameCards,
-            )).then((v) { if(context.mounted) Navigator.of(context).pop(); });
-          }
-        },
+        onPressed: saveProfile,
         child: const Icon(Icons.save),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,

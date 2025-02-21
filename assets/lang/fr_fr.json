@@ -1,0 +1,12 @@
+{
+  "state.villageFallsAsleep.title": "Le village s'endort...",
+  "state.villageFallsAsleep.description": "Le village s'endort doucement. Les villageois se retirent dans leur maison pour la nuit.",
+  "state.villageWakesUp.title": "Le village se réveille...",
+  "state.villageWakesUp.description": "Le village se réveille doucement. Les villageois sortent de leur maison pour une nouvelle journée.",
+  "state.villageMeeting.title": "Discussion du village",
+  "state.villageMeeting.description": "Les villageois discutent pour savoir qui est le loup-garou. Ils doivent se mettre d'accord pour éliminer un villageois.",
+  "state.villageVote.title": "Vote du village",
+  "state.villageVote.description": "Les villageois votent pour éliminer un villageois. Le villageois avec le plus de votes sera éliminé.",
+  "state.villageVoteResult.title": "Résultat du vote",
+  "state.villageVoteResult.description": "Le village a décidé d'éliminer le villageois {player}."
+}

@@ -66,46 +66,52 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-      - assets/cards/icons/classique.png
-      - assets/cards/icons/lesPersonnages.png
-      - assets/cards/icons/leVillage.png
-      - assets/cards/icons/nouvelleLune.png
+      - assets/lang/fr_fr.json
 
-      - assets/cards/chasseur.png
-      - assets/cards/cupidon.png
-      - assets/cards/voleur.png
-      - assets/cards/loupGarou.png
-      - assets/cards/villageois.png
-      - assets/cards/sorciere.png
-      - assets/cards/voyante.png
-      - assets/cards/petiteFille.png
+      - assets/textures/sunrise.jpg
+      - assets/textures/sunset.jpg
+      - assets/textures/meeting.jpg
 
-      - assets/cards/ancien.png
-      - assets/cards/boucEmissaire.png
-      - assets/cards/idiotDuVillage.png
-      - assets/cards/joueurDeFlute.png
-      - assets/cards/salvateur.png
+      - assets/textures/cards/icons/classique.png
+      - assets/textures/cards/icons/lesPersonnages.png
+      - assets/textures/cards/icons/leVillage.png
+      - assets/textures/cards/icons/nouvelleLune.png
 
-      - assets/cards/corbeau.png
-      - assets/cards/loupBlanc.png
-      - assets/cards/pyromane.png
+      - assets/textures/cards/chasseur.png
+      - assets/textures/cards/cupidon.png
+      - assets/textures/cards/voleur.png
+      - assets/textures/cards/loupGarou.png
+      - assets/textures/cards/villageois.png
+      - assets/textures/cards/sorciere.png
+      - assets/textures/cards/voyante.png
+      - assets/textures/cards/petiteFille.png
 
-      - assets/cards/abominableSectaire.png
-      - assets/cards/ange.png
-      - assets/cards/chevalierALEpeeRouillee.png
-      - assets/cards/chienLoup.png
-      - assets/cards/comedien.png
-      - assets/cards/deuxSoeurs.png
-      - assets/cards/enfantSauvage.png
-      - assets/cards/grandMechantLoup.png
-      - assets/cards/gitane.png
-      - assets/cards/infectPereDesLoups.png
-      - assets/cards/jugeBegue.png
-      - assets/cards/montreurDOurs.png
-      - assets/cards/renard.png
-      - assets/cards/servanteDevouee.png
-      - assets/cards/troisFreres.png
-      - assets/cards/villageoisVillageois.png
+      - assets/textures/cards/ancien.png
+      - assets/textures/cards/boucEmissaire.png
+      - assets/textures/cards/idiotDuVillage.png
+      - assets/textures/cards/joueurDeFlute.png
+      - assets/textures/cards/salvateur.png
+
+      - assets/textures/cards/corbeau.png
+      - assets/textures/cards/loupBlanc.png
+      - assets/textures/cards/pyromane.png
+
+      - assets/textures/cards/abominableSectaire.png
+      - assets/textures/cards/ange.png
+      - assets/textures/cards/chevalierALEpeeRouillee.png
+      - assets/textures/cards/chienLoup.png
+      - assets/textures/cards/comedien.png
+      - assets/textures/cards/deuxSoeurs.png
+      - assets/textures/cards/enfantSauvage.png
+      - assets/textures/cards/grandMechantLoup.png
+      - assets/textures/cards/gitane.png
+      - assets/textures/cards/infectPereDesLoups.png
+      - assets/textures/cards/jugeBegue.png
+      - assets/textures/cards/montreurDOurs.png
+      - assets/textures/cards/renard.png
+      - assets/textures/cards/servanteDevouee.png
+      - assets/textures/cards/troisFreres.png
+      - assets/textures/cards/villageoisVillageois.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

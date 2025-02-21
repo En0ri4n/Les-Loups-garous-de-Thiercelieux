@@ -1,8 +1,11 @@
+import 'package:werewolves_of_thiercelieux/objects/game_state.dart';
+import 'package:werewolves_of_thiercelieux/objects/utils.dart';
+
 enum GameVersion {
-  classic('Classique', 'assets/cards/icons/classique.png'),
-  nouvelleLuneExtension('Nouvelle Lune', 'assets/cards/icons/nouvelleLune.png'),
-  leVillageExtension('Le Village', 'assets/cards/icons/leVillage.png'),
-  personnagesExtension('Les Personnages', 'assets/cards/icons/lesPersonnages.png');
+  classic('Classique', 'assets/textures/cards/icons/classique.png'),
+  nouvelleLuneExtension('Nouvelle Lune', 'assets/textures/cards/icons/nouvelleLune.png'),
+  leVillageExtension('Le Village', 'assets/textures/cards/icons/leVillage.png'),
+  personnagesExtension('Les Personnages', 'assets/textures/cards/icons/lesPersonnages.png');
 
   final String name;
   final String icon;
@@ -11,18 +14,21 @@ enum GameVersion {
 
 enum RoleTeam { villager, werewolf, variable, independant }
 
+enum PlayTiming { day, night, onDeath, never }
+
 class GameCard {
   final int playOrder;
+  final PlayTiming timing;
   final GameVersion version;
   final String roleId;
   final String name;
   final String description;
   final RoleTeam team;
   final int requiredCount;
-  String get image => 'assets/cards/$roleId.png';
-  get icon => 'assets/cards/$roleId.png';
+  String get image => 'assets/textures/cards/$roleId.png';
+  get icon => 'assets/textures/cards/$roleId.png';
 
-  GameCard({required this.version, this.requiredCount = 1, required this.roleId, required this.team, this.name = '', this.description = ''})
+  GameCard({this.timing = PlayTiming.night, required this.version, this.requiredCount = 1, required this.roleId, required this.team, this.name = '', this.description = ''})
       : playOrder = GameCards.cardIndex[roleId] ?? -1,
         assert(requiredCount > 0, 'requiredCount must be greater than 0');
 
@@ -68,16 +74,16 @@ class GameCards {
   static final GameCard loupGarouCard = GameCard(version: GameVersion.classic, roleId: 'loupGarou', team: RoleTeam.werewolf, name: 'Loup-Garou', description: 'Les Loups-Garous sont des créatures de la nuit qui se réveillent pour dévorer un villageois chaque nuit.');
   static final GameCard voyanteCard = GameCard(version: GameVersion.classic, roleId: 'voyante', team: RoleTeam.villager, name: 'Voyante', description: 'La Voyante peut espionner un joueur chaque nuit pour connaître sa véritable identité.');
   static final GameCard sorciereCard = GameCard(version: GameVersion.classic, roleId: 'sorciere', team: RoleTeam.villager, name: 'Sorcière', description: 'La Sorcière peut sauver un joueur condamné à mort et tuer un autre joueur chaque nuit.');
-  static final GameCard chasseurCard = GameCard(version: GameVersion.classic, roleId: 'chasseur', team: RoleTeam.villager, name: 'Chasseur', description: 'Le Chasseur peut tuer un joueur de son choix lorsqu\'il est éliminé.');
+  static final GameCard chasseurCard = GameCard(version: GameVersion.classic, timing: PlayTiming.onDeath, roleId: 'chasseur', team: RoleTeam.villager, name: 'Chasseur', description: 'Le Chasseur peut tuer un joueur de son choix lorsqu\'il est éliminé.');
   static final GameCard cupidonCard = GameCard(version: GameVersion.classic, roleId: 'cupidon', team: RoleTeam.villager, name: 'Cupidon', description: 'Cupidon peut unir deux joueurs en amour, si l\'un meurt, l\'autre meurt de chagrin.');
   static final GameCard voleurCard = GameCard(version: GameVersion.classic, roleId: 'voleur', team: RoleTeam.villager, name: 'Voleur', description: 'Le Voleur peut échanger sa carte contre celle d\'un autre joueur.');
-  static final GameCard villageoisCard = GameCard(version: GameVersion.classic, roleId: 'villageois', team: RoleTeam.villager, name: 'Villageois', description: 'Le Villageois n\'a pas de pouvoir particulier, mais il peut voter pour éliminer un joueur chaque jour.');
-  static final GameCard petiteFilleCard = GameCard(version: GameVersion.classic, roleId: 'petiteFille', team: RoleTeam.villager, name: 'Petite Fille', description: 'La Petite Fille peut espionner les loups-garous pendant la nuit. Cependant, elle doit rester discrète, car si elle est découverte, elle risque d\'être éliminée.');
+  static final GameCard villageoisCard = GameCard(version: GameVersion.classic, timing: PlayTiming.never, roleId: 'villageois', team: RoleTeam.villager, name: 'Villageois', description: 'Le Villageois n\'a pas de pouvoir particulier, mais il peut voter pour éliminer un joueur chaque jour.');
+  static final GameCard petiteFilleCard = GameCard(version: GameVersion.classic, timing: PlayTiming.never, roleId: 'petiteFille', team: RoleTeam.villager, name: 'Petite Fille', description: 'La Petite Fille peut espionner les loups-garous pendant la nuit. Cependant, elle doit rester discrète, car si elle est découverte, elle risque d\'être éliminée.');
 
   // Nouvelle Lune extension cards
   static final GameCard ancienCard = GameCard(version: GameVersion.nouvelleLuneExtension, roleId: 'ancien', team: RoleTeam.villager, name: 'Ancien', description: 'L\'Ancien est un villageois qui a vécu de nombreuses parties. Il est très difficile à éliminer, car il résiste à la première attaque des Loups-Garous.');
-  static final GameCard boucEmissaireCard = GameCard(version: GameVersion.nouvelleLuneExtension, roleId: 'boucEmissaire', team: RoleTeam.villager, name: 'Bouc Émissaire', description: 'Si le vote du village amène une égalité, c\'est le Bouc émissaire qui est éliminé à la place des ex æquo. À lui de bien manœuvrer pour éviter cette triste conclusion.');
-  static final GameCard idiotDuVillageCard = GameCard(version: GameVersion.nouvelleLuneExtension, roleId: 'idiotDuVillage', team: RoleTeam.villager, name: 'Idiot du Village', description: 'S\'il est désigné par le vote du village, il ne meurt pas, et ce une seule fois dans la partie, mais perd seulement sa capacité à voter (Il peut participer aux débats).');
+  static final GameCard boucEmissaireCard = GameCard(version: GameVersion.nouvelleLuneExtension, timing: PlayTiming.never, roleId: 'boucEmissaire', team: RoleTeam.villager, name: 'Bouc Émissaire', description: 'Si le vote du village amène une égalité, c\'est le Bouc émissaire qui est éliminé à la place des ex æquo. À lui de bien manœuvrer pour éviter cette triste conclusion.');
+  static final GameCard idiotDuVillageCard = GameCard(version: GameVersion.nouvelleLuneExtension, timing: PlayTiming.onDeath, roleId: 'idiotDuVillage', team: RoleTeam.villager, name: 'Idiot du Village', description: 'S\'il est désigné par le vote du village, il ne meurt pas, et ce une seule fois dans la partie, mais perd seulement sa capacité à voter (Il peut participer aux débats).');
   static final GameCard joueurDeFluteCard = GameCard(version: GameVersion.nouvelleLuneExtension, roleId: 'joueurDeFlute', team: RoleTeam.independant, name: 'Joueur de Flûte', description: 'Le joueur de flûte se réveille en dernier. Il peut alors charmer un ou deux joueurs (en fonction du nombre de joueurs) qui deviendront les charmés. Il gagne lorsque tous les joueurs en vie sont charmés.');
   static final GameCard salvateurCard = GameCard(version: GameVersion.nouvelleLuneExtension, roleId: 'salvateur', team: RoleTeam.villager, name: 'Salvateur', description: 'Chaque nuit, le salvateur protège une personne. Cette personne sera protégée et ne pourra donc pas mourir durant la nuit. Le salvateur ne peut pas protéger la même personne deux nuits de suite.');
 
@@ -181,6 +187,27 @@ class GameProfileConfiguration {
   // Constructor without id, generates a new id
   GameProfileConfiguration.builder({required this.name, required this.cards, required this.players})
       : id = DateTime.now().millisecondsSinceEpoch;
+  
+  List<Player> generatePlayers() {
+    List<GameCardInstance> allCards = [...cards];
+    List<Player> players = [];
+
+    for (var playerName in this.players) {
+      GameCardInstance gameCardInstance = Utils.getRandom(allCards);
+      players.add(Player(playerName, gameCardInstance.gameCard, true));
+
+      if (gameCardInstance.count > 1) {
+        gameCardInstance.count--;
+      } else {
+        allCards.remove(gameCardInstance);
+      }
+    }
+
+    // Order players by play order
+    players.sort((a, b) => a.role.playOrder.compareTo(b.role.playOrder));
+
+    return players;
+  }
 
   Map<String, dynamic> serialize() {
     return {

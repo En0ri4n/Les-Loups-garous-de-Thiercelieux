@@ -26,17 +26,89 @@ class GameActionInstance {
   GameActionInstance(this.action, this.target, this.source);
 }
 
-class GameState {
+enum GameState {
+  villageFallsAsleep,
+  night,
+  villageWakesUp,
+  villageMeeting,
+  villageVote,
+  villageVoteResult,
+}
+
+class GameStep {
+  int step;
+  int maxStep;
+  int playerCount;
+
+  GameStep(List<Player> players) : step = 0, maxStep = calculateStepCount(players), playerCount = players.length;
+  GameStep.load(this.step, List<Player> players) : maxStep = calculateStepCount(players), playerCount = players.length;
+
+  GameState getCurrentState() {
+    if (step == 0) {
+      return GameState.villageFallsAsleep;
+    } else if (step >= 1 && step <= playerCount) {
+      return GameState.night;
+    } else if (step == 1 + playerCount) {
+      return GameState.villageWakesUp;
+    } else if (step == 2 + playerCount) {
+      return GameState.villageMeeting;
+    } else if (step == 3 + playerCount) {
+      return GameState.villageVote;
+    } else {
+      return GameState.villageVoteResult;
+    }
+  }
+
+  void next() {
+    step++;
+    if (step >= maxStep) {
+      step = 0;
+    }
+  }
+
+  static int calculateStepCount(List<Player> players) {
+    return
+        1   // Village falls asleep
+        + WerewolfGame.getCardsWith(players, PlayTiming.night).length // Night
+        + 1   // Village wakes up
+        + 1   // Village discussion
+        + 1   // Village vote
+        + 1;  // Village vote result
+  }
+}
+
+class WerewolfGame {
   final int id;
   final List<Player> players;
   final List<GameActionInstance> actionsHistory;
+  final int time;
 
   int nightCount;
-  bool isDay;
+  GameStep gameStep;
 
-  GameState(this.id, this.players, this.actionsHistory, {this.nightCount = 0, this.isDay = true});
+  WerewolfGame(this.id, this.players, this.actionsHistory, this.time, {required this.nightCount, required this.gameStep});
 
-  GameState.create(this.players) : id = DateTime.now().millisecondsSinceEpoch, actionsHistory = [], nightCount = 0, isDay = true;
+  WerewolfGame.fromProfile(GameProfileConfiguration profile) :
+        id = DateTime.now().millisecondsSinceEpoch,
+        players = profile.generatePlayers(),
+        actionsHistory = [],
+        time = 0,
+        nightCount = 0,
+        gameStep = GameStep([]) {
+    gameStep = GameStep(players);
+  }
+
+  void nextStep() {
+    gameStep.next();
+  }
+
+  GameCard getCardForStep() {
+    return getCardsWith(players, PlayTiming.night)[gameStep.step - 1];
+  }
+
+  static List<GameCard> getCardsWith(List<Player> players, PlayTiming timing) {
+    return players.where((p) => p.role.timing == timing).map((p) => p.role).toList();
+  }
 
   Map<String, dynamic> serialize() {
     return {
@@ -51,12 +123,13 @@ class GameState {
         'target': action.target.name,
         'source': action.source.name,
       }).toList(),
+      'time': time,
       'nightCount': nightCount,
-      'isDay': isDay,
+      'gameStep': gameStep.step,
     };
   }
 
-  static GameState deserialize(Map<String, dynamic> data) {
+  static WerewolfGame deserialize(Map<String, dynamic> data) {
     final id = data['id'];
 
     final players = data['players'].map<Player>((playerData) {
@@ -71,9 +144,11 @@ class GameState {
       );
     }).toList();
 
-    final nightCount = data['nightCount'];
-    final isDay = data['isDay'];
+    final time = data['time'];
 
-    return GameState(id, players, actionsHistory, nightCount: nightCount, isDay: isDay);
+    final nightCount = data['nightCount'];
+    final gameStep = GameStep.load(data['gameStep'], players);
+
+    return WerewolfGame(id, players, actionsHistory, time, nightCount: nightCount, gameStep: gameStep);
   }
 }

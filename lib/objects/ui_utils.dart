@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
 class UIUtils {
+  static String sunsetImage = 'assets/textures/sunset.jpg';
+  static String sunriseImage = 'assets/textures/sunrise.jpg';
+  static String meetingImage = 'assets/textures/meeting.jpg';
+
   static AlertDialog createAlertDialog(BuildContext context, String title, String content, {List<Widget>? actions}) {
     return AlertDialog(
       title: Text(title),

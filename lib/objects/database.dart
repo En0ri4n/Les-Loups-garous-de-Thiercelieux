@@ -105,7 +105,7 @@ class GameDatabase {
     return records.map((record) => GameProfileConfiguration.deserialize(record.value)).toList();
   }
 
-  Future<void> saveGame(GameState game) async {
+  Future<void> saveGame(WerewolfGame game) async {
     await _ensureInitialized();
     final store = intMapStoreFactory.store(_gamesStoreName);
     await store.add(_database, game.serialize());
